@@ -1,0 +1,10 @@
+websockets==11.0.3
+kafka-python==2.0.2
+python-dotenv==1.0.0
+asyncio==3.4.3
+aiohttp
+flask
+flask-socketio
+flask-cors
+confluent_kafka
+requests
