@@ -18,8 +18,12 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": ["http://localhost:3000"]}})
-socketio = SocketIO(app, cors_allowed_origins=["http://localhost:3000"])
+# Get the frontend URL from environment variables
+frontend_url = os.getenv('FRONTEND_URL')
+# Set CORS with the frontend URL
+CORS(app, resources={r"/*": {"origins": [frontend_url]}})
+# Initialize SocketIO with the frontend URL for allowed origins
+socketio = SocketIO(app, cors_allowed_origins=[frontend_url])
 
 class ExchangeWebsocketClient:
     RATE_LIMIT_INTERVAL = 1
