@@ -22,6 +22,7 @@ CORS(app, resources={r"/*": {"origins": ["http://localhost:3000"]}})
 socketio = SocketIO(app, cors_allowed_origins=["http://localhost:3000"])
 
 class ExchangeWebsocketClient:
+    RATE_LIMIT_INTERVAL = 1
     def __init__(self, exchange_name, config, kafka_manager):
         self.exchange_name = exchange_name
         self.ws_url = config['ws_url']
@@ -36,6 +37,8 @@ class ExchangeWebsocketClient:
         self.high_price = float('-inf')
         self.floor_price = float('inf')
         self.current_price = None
+        # Store last emit time per (exchange, symbol) pair
+        self.last_emit_times = {}
 
     async def connect(self):
         while self.retry_count < self.max_retries:
@@ -106,11 +109,20 @@ class ExchangeWebsocketClient:
                         "low_price": self.low_price,
                         "high_price": self.high_price,
                         "floor_price": self.floor_price
-                    }                    
-                    # Send to Kafka
-                    self.kafka_manager.send_message(trade_data)
-                    # Emit to WebSocket clients using global socketio instance
-                    socketio.emit("price_update", trade_data)
+                    }
+                    # Rate limit WebSocket emissions per (exchange, symbol)
+                    key = f"{self.exchange_name}:{self.symbol}"
+                    current_time = time.time()
+                    last_emit_time = self.last_emit_times.get(key, 0)
+
+                    if current_time - last_emit_time >= self.RATE_LIMIT_INTERVAL:
+                        # Send to Kafka
+                        self.kafka_manager.send_message(trade_data)
+                        self.last_emit_times[key] = current_time
+                        socketio.emit("price_update", trade_data)
+                        logger.info(f"Emitted WebSocket update for {key} at {current_time}")
+                    else:
+                        logger.info(f"Rate limit hit. Skipping emission for {key}")
 
         except Exception as e:
             logger.error(f"Error in message_handler for {self.exchange_name}: {str(e)}")

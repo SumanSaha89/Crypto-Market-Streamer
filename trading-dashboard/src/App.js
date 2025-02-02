@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 const TradingViewer = () => {
   const listRef = useRef(null);
@@ -25,23 +24,6 @@ const TradingViewer = () => {
     return symbol.replace(/-/g, '').toUpperCase();
   };
 
-  const scrollLeft = () => {
-    if (listRef.current) {
-      console.log('Scrolling left');
-      listRef.current.scrollBy({ left: -200, behavior: "smooth" });
-    } else {
-      console.log('listRef.current is null');
-    }
-  };
-
-  const scrollRight = () => {
-    if (listRef.current) {
-      console.log('Scrolling right');
-      listRef.current.scrollBy({ left: 200, behavior: "smooth" });
-    } else {
-      console.log('listRef.current is null');
-    }
-  };
 
   useEffect(() => {
     if (symbol) {

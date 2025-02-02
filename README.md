@@ -49,7 +49,7 @@ cp .env.example .env
 ```
 Update the `.env` file with your configuration:
 ```env
-KAFKA_BOOTSTRAP_SERVERS=localhost:9092
+KAFKA_BOOTSTRAP_SERVERS=kafka:29092
 KAFKA_TOPIC=crypto_market_data
 RECONNECT_DELAY=5
 MAX_RETRIES=5
@@ -96,8 +96,6 @@ docker-compose logs kafka
 ```
 
 ### Health Checks
-
-- Backend Health: http://localhost:5000/health
 - Kafka UI: http://localhost:8080
 
 ## 🧪 Development Setup
