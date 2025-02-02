@@ -178,7 +178,14 @@ def get_latest_price():
             else:
                 # Keep the symbol as is for Bybit and MEXC
                 EXCHANGES[exchange]['symbol'] = symbol
-
+        # Check if the symbol is already active to avoid duplicate connections
+        existing_symbols = {client.symbol for client in active_clients.values()}
+        if symbol in existing_symbols:
+            return jsonify({
+                'status': 'success',
+                'message': f'WebSocket connections already active for {symbol}',
+                'exchanges': {exchange: {'symbol': client.symbol} for exchange, client in active_clients.items()}
+            })
         # Stop existing clients if any
         for client in active_clients.values():
             client.connected = False
